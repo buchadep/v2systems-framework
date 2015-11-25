@@ -41,11 +41,15 @@ public class testClass {
 
                 ftpServer.setStopRequest(true);
                 */
-                //CustomXml xml = new CustomXml();
+                CustomXml xml = new CustomXml();
                 //KeyValuePair keyValuePair;
                 //List<KeyValuePair> attributes = new ArrayList<KeyValuePair>();
                 //attributes.add(new KeyValuePair("added_pankaj=Pankaj",'='));
-                //xml.openXml("c:\\work\\data\\EST_SINGLE_TITLE.xml");
+                xml.openXml("c:\\work\\data\\templates\\BOXSET_Show_Template.xml");
+                System.out.println(xml.countElementsByXpath("//Ext"));
+                xml.cloneXmlTag("//Ext",1);
+                xml.cloneXmlTag("//*[name()='ext:GroupMemberRef']",1);
+                System.out.println(xml.countElementsByXpath("//Ext"));
                 //xml.appendXmlTag("ext:ProgramKey", attributes, "true", "core:Ext");
 
                 /*xml.appendXmlTag("Windows", attributes, null, "Schedule");
@@ -94,7 +98,7 @@ public class testClass {
                 xml.updateElementAttributeValue(xml.findElementsByXpath("//Terms[@uriId]"), "Terms","est__sbo_hd/TAVT2309201500000001");
 
                 */
-                //xml.writeXml("c:\\work\\data\\processedxml.xml");
+                xml.writeXml("c:\\work\\data\\processedxml.xml");
                 /*CustomFile file = new CustomFile();
                 file.setFileName("c:\\work\\data\\appdata");
                 file.deleteFile();
@@ -107,6 +111,7 @@ public class testClass {
                 l.addRow("TitleMedium|T|//Title//*[name()='title:TitleMedium']",'|');
                 l.getRow("TitleMedium");
                 */
+               /*
                 CustomSqlClient customSqlClient = new CustomSqlClient();
                 String sqLightDBFilePath= "c:\\work\\data\\OnDemand";
                 customSqlClient.setConnectionDetails("sqlite",sqLightDBFilePath);
@@ -116,7 +121,7 @@ public class testClass {
                 for(int i=0; i<result.size();i++) {
                     System.out.println(result.get(i).toString());
                 }
-
+                */
             }catch(Exception e){
                 System.out.println("I am in main: " + e);
             }

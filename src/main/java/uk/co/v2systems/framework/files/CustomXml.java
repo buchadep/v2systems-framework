@@ -32,22 +32,17 @@ public class CustomXml {
     static Document doc;
     String inputXmlFile;
 
-    /*
-    Open a new xml file
-     */
+//Open a new blank xml file
     public void openXml(){
         try{
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             doc = docBuilder.newDocument();
-
         }catch (Exception e){
-            System.out.println("Exception in CustomXml.openXml :: " + e);
+            System.out.println("Exception in "+ this.getClass()+":: " + e);
         }
     }
-    /*
-    Open an existing xml file and parse it
-     */
+//    Open an existing xml file and parse it
     public int openXml(String inputXmlFile){
         try{
             this.inputXmlFile=inputXmlFile;
@@ -57,15 +52,15 @@ public class CustomXml {
             doc = docBuilder.parse(fXmlFile);
             return 0;//success
         }catch (Exception e){
-            System.out.println("Exception in CustomXml.openXml :: " + e);
-            return 1;
+            System.out.println("Exception in "+ this.getClass()+":: " + e);
+            return -1;
         }
     }
-
+// Add new xmlTag tagName, tagAttribute, tagValue and parentXmlTag if multiple tag matching parent tag add after first occurance
     public void addXmlTag(String tagName, List<KeyValuePair> attributes, String tagValue,String strParentXmlTag){
         addXmlTag(tagName,attributes,tagValue, strParentXmlTag,0);
     }
-
+// Add new xmlTag tagName, tagAttribute, tagValue and parentXmlTag if multiple tag matching parent tag add after specified occurance
     public void addXmlTag(String tagName, List<KeyValuePair> attributes, String tagValue, String strParentXmlTag, int occurrence){
         Element parentXmlTag=null;
         NodeList nodeList = doc.getElementsByTagName(strParentXmlTag);
@@ -73,9 +68,7 @@ public class CustomXml {
             parentXmlTag = (Element) nodeList.item(occurrence);
         addXmlTag(tagName,attributes,tagValue,parentXmlTag);
     }
-/*
-Add element to the end of searched nodelist
-*/
+// append(Add) new xmlTag tagName, tagAttribute, tagValue and parentXmlTag if multiple tag matching parent tag replace last occurance
     public void appendXmlTag(String tagName, List<KeyValuePair> attributes, String tagValue, String strParentXmlTag){
         Element parentXmlTag=null;
         NodeList nodeList = doc.getElementsByTagName(strParentXmlTag);
@@ -83,14 +76,7 @@ Add element to the end of searched nodelist
             parentXmlTag = (Element) nodeList.item(nodeList.getLength()-1);
         addXmlTag(tagName,attributes,tagValue,parentXmlTag);
     }
-
-/*
-    Add xmltag to existing xml under parent tag
-    tagName: tag to add
-    attributes: list of attributes to be added to the new xml tag
-    tagValue: value for the xml tag
-    parentXmlTag: tag to be added under parent xml tag
- */
+// Add xmltag (Main Logic)to existing xml under parent tag, xmlTag, list of tagattribute, tagValue, tagParent
     public void addXmlTag(String tagName, List<KeyValuePair> attributes, String tagValue, Element parentXmlTag){
         try {
             Element xmlElement = doc.createElement(tagName);
@@ -109,36 +95,52 @@ Add element to the end of searched nodelist
                     doc.appendChild(xmlElement);
             }
         }catch(Exception e){
-            System.out.println("Exception in createXML.addXmlTag :: " + e);
+            System.out.println("Exception in "+ this.getClass()+":: " + e);
         }
     }
-/*
-    findElements by xpath
- */
+//Clone xmlTag and add under the same parent
+    public int cloneXmlTag(String xPath, int numOfCopies){
+        try{
+            //Expecting to clone one element at a time, despite getting NodeList, interested in only one of a kind
+            NodeList nodeList = findElementsByXpath(xPath);
+            int i = 0;
+            for ( ;i < numOfCopies; i++) {
+                //clone deep
+                nodeList.item(0).getParentNode().appendChild(nodeList.item(0).cloneNode(true));
+            }
+            return i;
+        }catch(Exception e){
+            System.out.println("Exception in "+ this.getClass()+":: " + e);
+            return -1;
+        }
+    }
+//findElements by xpath and return NodeList
     public NodeList findElementsByXpath(String xPath) {
-
         try {
             XPathFactory factory = XPathFactory.newInstance();
             XPath xpath = factory.newXPath();
             XPathExpression expr = xpath.compile(xPath);
             NodeList nodeList= (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-            /* For debugging
-            System.out.println("Number of Elements Found: " + nodeList.getLength());
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Element element=(Element)nodeList.item(i);
-                System.out.println("<" + element.getNodeName() + ">" + element.getTextContent());
-
-            }*/
             return nodeList;
         } catch (Exception e) {
-            System.out.println("Exception in CustomXml.findElementsByXpath :: " + e);
+            System.out.println("Exception in "+ this.getClass()+":: " + e);
             return null;
         }
     }
-/*
-    Update Element Value
-    returns: number of updates
- */
+//get count of Elements by xpath and return NodeList
+    public int countElementsByXpath(String xPath) {
+        try {
+            XPathFactory factory = XPathFactory.newInstance();
+            XPath xpath = factory.newXPath();
+            XPathExpression expr = xpath.compile(xPath);
+            NodeList nodeList= (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+            return nodeList.getLength();
+        } catch (Exception e) {
+            System.out.println("Exception in "+ this.getClass()+":: " + e);
+            return 0;
+        }
+    }
+//Update Element Value & returns: number of updates
     public int updateElementValue(NodeList nodeList, String newValue) {
         try {
             int i = 0;
@@ -147,18 +149,13 @@ Add element to the end of searched nodelist
                 Element element=(Element)nodeList.item(i);
                 element.setTextContent(newValue);
             }
-
             return i;
         } catch (Exception e) {
-            System.out.println("Exception in CustomXml.updateElementValue :: " + e);
+            System.out.println("Exception in "+ this.getClass()+":: " + e);
             return 0;
         }
     }
-
-    /*
-        Update Element attribute Value
-        returns: number of updates
-     */
+//Update Element attribute Value & returns: number of updates
     public int updateElementAttributeValue(NodeList nodeList, String attribute, String newAttributeValue) {
         try {
             int i = 0;
@@ -167,17 +164,13 @@ Add element to the end of searched nodelist
                 Element element=(Element)nodeList.item(i);
                 element.setAttribute(attribute, newAttributeValue);
             }
-
             return i;
         } catch (Exception e) {
-            System.out.println("Exception in CustomXml.updateElementAttributeValue :: " + e);
+            System.out.println("Exception in "+ this.getClass()+":: " + e);
             return 0;
         }
     }
-    /*
-        replacing matching substring with new substring in attribute
-        returns: number of updates
-     */
+//replacing matching substring with new substring in attribute & returns: number of updates
     public int replaceElementAttributeValue(NodeList nodeList, String attribute, String searchString, String replaceString) {
         try {
             int count = 0;
@@ -188,21 +181,18 @@ Add element to the end of searched nodelist
                     element.setAttribute(attribute,element.getAttribute(attribute).replaceAll(searchString, replaceString));
                     count++;
                 }
-
             }
-
             return count;
         } catch (Exception e) {
-            System.out.println("Exception in CustomXml.replaceElementAttributeValue :: " + e);
+            System.out.println("Exception in "+ this.getClass()+":: " + e);
             return 0;
         }
     }
-
-    /*Split the String in to 2 across the searchString and replace either 1 part or second part*/
+//Split the String in to 2 across the searchString and replace either 1 part or second part
     public int replaceElementAttributeValue(NodeList nodeList, String attribute,String searchString, boolean keepFirst, String replaceString) {
        return  replaceElementAttributeValue(nodeList,attribute,searchString,keepFirst,0,replaceString);
     }
-
+//
     public int replaceElementAttributeValue(NodeList nodeList, String attribute,String searchString, boolean keepFirst, int numberOfChar2retain, String replaceString) {
         try {
             String [] splitString={"",""};
@@ -221,14 +211,13 @@ Add element to the end of searched nodelist
                 element.setAttribute(attribute,replaceStringInstance);
                 count++;
             }
-
             return count;
         } catch (Exception e) {
-            System.out.println("Exception in CustomXml.replaceElementAttributeValue :: " + e);
+            System.out.println("Exception in "+ this.getClass()+":: " + e);
             return 0;
         }
     }
-
+//
     public void printXml(){
         printXml(doc);
     }
@@ -244,9 +233,8 @@ Add element to the end of searched nodelist
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
             transformer.transform(source,result);
         }catch(Exception e){
-            System.out.println("Exception in createXML.printXml :: " + e);
+            System.out.println("Exception in "+ this.getClass()+":: " + e);
         }
-
     }
     public String xmlToString(){
         return xmlToString(doc);
@@ -284,14 +272,9 @@ Add element to the end of searched nodelist
     }catch(Exception e){
         System.out.println("Exception in createXML.printXml :: " + e);
         }
-    }
-
-    /*
-    Purpose: Validate xml against xsd file
-    */
-
-    public boolean validateAgainstXSD(String xsdFile )
-    {
+   }
+//    Purpose: Validate xml against xsd file
+    public boolean validateAgainstXSD(String xsdFile ){
         try
         {
             InputStream xml = new FileInputStream(new File(this.inputXmlFile));;
@@ -303,8 +286,8 @@ Add element to the end of searched nodelist
             validator.validate(new StreamSource(xml));
             return true;
         }
-        catch(Exception ex)
-        {
+        catch(Exception e){
+            System.out.println("Exception in "+ this.getClass()+":: " + e);
             return false;
         }
     }
