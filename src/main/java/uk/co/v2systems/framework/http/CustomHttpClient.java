@@ -193,6 +193,7 @@ public class CustomHttpClient {
             }
         }
 
+
         private int printHttpResponse( HttpResponse response, boolean verbose) {
             try {
                 HttpEntity resEntity = response.getEntity();
@@ -204,18 +205,32 @@ public class CustomHttpClient {
                 for (int i = 0; i < resHeaders.length; i++) {
                     Methods.printConditional("Header: " + resHeaders[i].toString(), verbose);
                 }
-                //reading Response
+
+                //reading Response and calling write to File
+                /*
                 if(resEntity!=null) {
                     BufferedReader r = new BufferedReader(new InputStreamReader(resEntity.getContent()));
-                    String line = null;
                     this.writeToFile(r);
                 }
+                */
+                //added for JPEG
+                HttpEntity entity = response.getEntity();
+                InputStream is = entity.getContent();
+                String filePath = outfile.toPath().toString();
+                FileOutputStream fos = new FileOutputStream(new File(filePath));
+                int inByte;
+                while((inByte = is.read()) != -1)
+                    fos.write(inByte);
+                is.close();
+                fos.close();
+
                 return 0; //success
             }catch(Exception e){
                 System.out.println("Exception in [CustomHttpClient.printHttpResponse]:" + e.toString());
                 return 1; //exception
             }
         }
+
         private void writeToFile( BufferedReader r){
             Charset charset = Charset.forName("US-ASCII");
             String line = null;

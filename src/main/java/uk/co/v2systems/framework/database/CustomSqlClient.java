@@ -3,6 +3,8 @@ package uk.co.v2systems.framework.database;
 /**
  * Created by Pankaj Buchade on 23/06/2015.
  */
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import uk.co.v2systems.framework.utils.Methods;
 import java.sql.*;
 import java.util.Properties;
@@ -26,6 +28,8 @@ public class CustomSqlClient {
     public static int rowCount=0;
     public static ResultSetMetaData resultSetMetadata;
 
+    static Logger logger = LogManager.getLogger(CustomSqlClient.class);
+
 //Set Connection properties for Oracle DB Connection
     public void setConnectionDetails(String dbms, String serverName, String portNumber, String dbName, String userName, String password){
         this.dbms=dbms;
@@ -42,17 +46,17 @@ public class CustomSqlClient {
     }
     public void getConnectionDetails(){
         //Common Details
-        Methods.printConditional("\nDatabase: "+dbms);
+        logger.info("\nDatabase: " + dbms);
         if(dbms.equalsIgnoreCase("oracle")){
-            Methods.printConditional("\nHostName: "+serverName);
-            Methods.printConditional("\nDB Port: "+portNumber);
+            logger.info("\nHostName: " + serverName);
+            logger.info("\nDB Port: " + portNumber);
         }
         if(dbms.equalsIgnoreCase("sqlite")){
-            Methods.printConditional("\nDB File Name: "+dbFileName);
+            logger.info("\nDB File Name: " + dbFileName);
         }
-            Methods.printConditional("\nDB Name: "+dbName);
-            Methods.printConditional("\nDB UserName: "+userName);
-            Methods.printConditional("\nPassword: "+password);
+            logger.info("\nDB Name: " + dbName);
+            logger.info("\nDB UserName: " + userName);
+            logger.info("\nPassword: " + password);
     }
 //Establish Connection to Database
     public Connection connect(){
@@ -67,7 +71,7 @@ public class CustomSqlClient {
                                     this.serverName +
                                     ":" + this.portNumber + ":" +
                                     this.dbName, connectionProps);
-                Methods.printConditional("Connected to database: " + this.serverName + "::" + this.dbName);
+                logger.info("Connected to database: " + this.serverName + "::" + this.dbName);
             }
             if(dbms.equalsIgnoreCase("sqlite")){
                 Class.forName("org.sqlite.JDBC");
@@ -75,11 +79,11 @@ public class CustomSqlClient {
                     conn = DriverManager.getConnection(
                             "jdbc:" + this.dbms + ":" +
                                     this.dbFileName, connectionProps );
-                Methods.printConditional("Connected to sqlLite database File: " + this.dbFileName);
+                logger.info("Connected to sqlLite database File: " + this.dbFileName);
             }
             return conn;
         }catch(Exception e){
-            System.out.println("Error While establishing sql connection...\n" +e);
+            logger.error("Error While establishing sql connection...\n" + e.toString());
             return null;
         }
     }
@@ -94,7 +98,7 @@ public class CustomSqlClient {
                resultSetMetadata=resultSet.getMetaData();
             }
         }catch(SQLException e){
-            System.out.println("Exception "+e+" in SqlClient.executeQuery");
+            logger.error(e.toString());
         }
     }
 //Print as well as return SQL query result
@@ -104,30 +108,31 @@ public class CustomSqlClient {
 //getResultSet can be controlled as verbose or non verbose also used by getRowCount
     public ResultSet getResultSet(boolean verbose){
         try{
-            Methods.printConditional("\nSQL: " + this.queryString + "\n");
+            logger.info("\nSQL: " + this.queryString);
+            String resultRow="";
             int numberOfRows = 0;
             rowCount=0;
             //printing column Headers
             for(int i=0; i< resultSetMetadata.getColumnCount();i++) {
-                Methods.printConditional(resultSetMetadata.getColumnLabel(i + 1) + "\t",verbose);
+                logger.debug(resultSetMetadata.getColumnLabel(i + 1) + "\t", verbose);
             }
             System.out.print("\n");
             //printing Result set rows
             while(resultSet.next()) {
                 if(resultSet.toString()!=null) {
                     for (int i = 0; i < resultSetMetadata.getColumnCount(); i++) {
-                        Methods.printConditional(resultSet.getString(resultSetMetadata.getColumnLabel(i + 1)) + "\t", verbose);
+                        resultRow=resultRow+resultSet.getString(resultSetMetadata.getColumnLabel(i + 1)) + "\t";
                     }
-                    Methods.printConditional("\n\n", verbose);
+                    logger.debug(resultRow);
                     numberOfRows++;
                 }
             }
-            System.out.println("Total rows returned: " + numberOfRows);
+            logger.debug("Total rows returned: " + numberOfRows);
             this.rowCount = numberOfRows;
             this.executeQuery(queryString);
             return this.resultSet;
         }catch(SQLException e){
-            System.out.println("Exception in SqlClient.getResultSet");
+            logger.error("Failed to get result using SQL: " + queryString);
             return null;
         }
     }
@@ -138,10 +143,11 @@ public class CustomSqlClient {
             resultSet.close();
             conn.close();
         }catch(Exception e){
-            System.out.println("Exception in SqlClient.close");
+            logger.error("Failed to close database...");
         }
     }
-//Get row count, please note that you should execute show result before you use this function.
+
+    //Get row count, please note that you should execute show result before you use this function.
     public int getRowCount() {
         if(rowCount==0){
             getResultSet(false);

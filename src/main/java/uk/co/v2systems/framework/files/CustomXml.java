@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 
@@ -31,6 +33,7 @@ public class CustomXml {
 
     static Document doc;
     String inputXmlFile;
+    String ENCODING = "UTF-8";
 
 //Open a new blank xml file
     public void openXml(){
@@ -47,9 +50,11 @@ public class CustomXml {
         try{
             this.inputXmlFile=inputXmlFile;
             File fXmlFile = new File(inputXmlFile);
+
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-            doc = docBuilder.parse(fXmlFile);
+            FileInputStream in = new FileInputStream(fXmlFile);
+            doc = docBuilder.parse(in, ENCODING);
             return 0;//success
         }catch (Exception e){
             System.out.println("Exception in "+ this.getClass()+":: " + e);
@@ -229,6 +234,7 @@ public class CustomXml {
             //print on the screen
             StreamResult result = new StreamResult(System.out);
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            transformer.setOutputProperty(OutputKeys.ENCODING, ENCODING);
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
             transformer.transform(source,result);
@@ -248,6 +254,7 @@ public class CustomXml {
             StringWriter writer = new StringWriter();
             StreamResult result = new StreamResult(writer);
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            transformer.setOutputProperty(OutputKeys.ENCODING, ENCODING);
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
             transformer.transform(source,result);
@@ -265,6 +272,7 @@ public class CustomXml {
             DOMSource source = new DOMSource(doc);
             //writing to File
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            transformer.setOutputProperty(OutputKeys.ENCODING, ENCODING);
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
             StreamResult result = new StreamResult(new File(fileOut));

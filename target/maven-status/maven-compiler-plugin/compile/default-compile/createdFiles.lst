@@ -8,7 +8,9 @@ uk\co\v2systems\framework\utils\Methods.class
 uk\co\v2systems\framework\utils\CustomDate.class
 uk\co\v2systems\framework\shell\CustomSshClient.class
 uk\co\v2systems\framework\utils\ListKeyValuePair.class
+uk\co\v2systems\framework\shell\CustomSftpClient.class
 uk\co\v2systems\framework\http\CustomHttpClient.class
 uk\co\v2systems\framework\shell\CustomTelnetClient.class
 uk\co\v2systems\framework\database\CustomSqlClient.class
+uk\co\v2systems\framework\utils\ResizeImage.class
 uk\co\v2systems\framework\server\CustomFtpServer.class

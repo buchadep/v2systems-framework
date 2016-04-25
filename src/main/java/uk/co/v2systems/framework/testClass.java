@@ -9,6 +9,9 @@ import uk.co.v2systems.framework.shell.CustomSshClient;
 import uk.co.v2systems.framework.shell.CustomTelnetClient;
 import uk.co.v2systems.framework.utils.*;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +27,9 @@ public class testClass {
                 //CustomSshClient.executeCommand("ls -ltr /apps ",true);
                 //CustomSshClient.executeCommand("ls -ltr /apps ",true);
                 //CustomSshClient.executeCommand("ls -ltr /apps ",true);
+
+
+                ResizeImage.resizeImage( "C:\\Temp\\Spectre.JPG", 182, 243, "png","testResizeImage","C:\\Temp\\");
 
                 /*
                 CustomFtpServer ftpServer = new CustomFtpServer();
