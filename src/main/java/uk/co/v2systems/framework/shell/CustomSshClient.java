@@ -3,10 +3,8 @@ package uk.co.v2systems.framework.shell;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.co.v2systems.framework.utils.Methods;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.io.*;
 
 /**
@@ -22,7 +20,7 @@ public class CustomSshClient {
     static String lastCommandStatus;
     static String lastCommandOutput;
     static boolean isAuthenticated=false;
-    static Logger slf4jLogger = LoggerFactory.getLogger(CustomSshClient.class);
+    static Logger logger = LogManager.getLogger(CustomSshClient.class);
 
     public static int connect(){
         if(hostname!=null && port!=-1 && username!=null && password !=null )
@@ -40,11 +38,11 @@ public class CustomSshClient {
             connection.connect();
             isAuthenticated = connection.authenticateWithPassword(username, password);
             if (!isAuthenticated)
-                throw new IOException("\nauthenticateWithPassword failed.");
-            Methods.printConditional("\nconnected to server " + hostname);
+                throw new IOException("authenticateWithPassword failed.");
+            logger.info("ssh successfully connected to host: " + hostname);
             return 0;
         }catch(Exception e){
-            slf4jLogger.error("\nException in CustomSshClient.connect: " + e.toString());
+            logger.error("\nFailed to connect host: " + hostname +"  "+ e.toString());
             return 1; //Exception
         }
     }
@@ -57,12 +55,13 @@ public class CustomSshClient {
             connection.connect(null,10000,10000);
             isAuthenticated = connection.authenticateWithPublicKey(username, keyfile, keyfilePass);
             if (!isAuthenticated){
-                Methods.printConditional("\nauthenticateWithPublicKey failed.");
-                Methods.printConditional(connection.getRemainingAuthMethods(username).clone()[0]);
+                logger.debug("authenticateWithPublicKey failed.");
+                logger.debug(connection.getRemainingAuthMethods(username).clone()[0]);
             }
+            logger.info("SSH successfully connected to host: " + hostname);
             return 0;
         }catch(Exception e){
-            slf4jLogger.error("\nException in CustomSshClient.connect: " + e.toString());
+            logger.error("Failed to connect host: " + hostname +"  "+ e.toString());
             return 1; //Exception
         }
     }
@@ -87,20 +86,19 @@ public class CustomSshClient {
                     while((line = br.readLine()) != null){
                         completeString.append("\n"+line);
                     }
-                    Methods.printConditional("\n"+command, verbose);
                     lastCommandOutput = completeString.toString();
-                    Methods.printConditional("\n"+lastCommandOutput, verbose);
+                    logger.debug(lastCommandOutput);
                     lastCommandStatus = session.getExitStatus().toString();
-                    Methods.printConditional("\nexit code(" + lastCommandStatus + ")", verbose);
+                    logger.info("command: " + command + " exited with status code = " + lastCommandStatus);
                     CustomSshClient.close();
                     return lastCommandOutput;
                 }
             }
             else
-                slf4jLogger.error("\nNot connected to any server...! Please use method CustomSshClient.connect()");
+                logger.error("Not connected to any server...! Please use method CustomSshClient.connect()");
         }catch(Exception e){
             CustomSshClient.close();
-            return ("\nException in CustomSshClient.executeCommand: " + e);
+            return ("Exception in CustomSshClient.executeCommand: " + e);
         }
         CustomSshClient.close();
         return "No command to execute";
@@ -120,7 +118,7 @@ public class CustomSshClient {
                 session.close();
             return 0;
         }catch(Exception  e){
-            slf4jLogger.error("Exception in CustomSshClient.close: " + e.toString());
+            logger.error("Unable to close ssh channel " + e.toString());
             return 1;
         }
     }

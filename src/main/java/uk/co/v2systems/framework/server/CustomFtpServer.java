@@ -64,7 +64,7 @@ public class CustomFtpServer implements Runnable {
             try{
                 if(server!=null && stopRequest==true) {
                     server.stop();
-                    System.out.println("FTP Server Stopped!");
+                    slf4jLogger.info("FTP Server Stopped!");
                 }
 
             }catch(Exception e){

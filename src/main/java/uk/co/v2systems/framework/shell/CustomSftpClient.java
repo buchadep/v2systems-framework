@@ -3,11 +3,11 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-import uk.co.v2systems.framework.utils.Methods;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
+
 
 
 /**
@@ -24,6 +24,7 @@ public class CustomSftpClient {
     static Channel channel = null;
     static ChannelSftp channelSftp = null;
     static JSch jsch = null;
+    static Logger logger = LogManager.getLogger(CustomSftpClient.class);
 
     public  static int send (String fileName, String remoteDir) {
         try {
@@ -32,27 +33,27 @@ public class CustomSftpClient {
                 remoteDirPath=remoteDir;
                 channelSftp.cd(remoteDirPath);
                 channelSftp.put(new FileInputStream(file), file.getName());
-                Methods.printConditional("File transfered successfully to host.");
+                logger.info("sft successfully transferred file="+fileName+" to "+hostname+":"+remoteDir);
                 return 0;
             }
             else{
-                Methods.printConditional("Please enter correct file path");
+                logger.error("file "+fileName+" doesnt exists");
                 return 1;
             }
 
         } catch (Exception ex) {
-            System.out.println("Exception found while tranfer the response.");
+            logger.error("Failed to sft file.");
             return 1;
         }
     }
 
     //Connect using Secure Shell using username password
-    public static int connect (String hostname, int port, String username, String password) {
+    public static int connect (String hostnameIn, int portIn, String usernameIn, String passwordIn) {
         try{
-            CustomSshClient.port=port;
-            CustomSshClient.hostname=hostname;
-            CustomSshClient.username=username;
-            CustomSshClient.password=password;
+            port=portIn;
+            hostname=hostnameIn;
+            username=usernameIn;
+            password=passwordIn;
         //Establish sftp Channel
             jsch = new JSch();
             session = jsch.getSession(username, hostname, port);
@@ -61,14 +62,40 @@ public class CustomSftpClient {
             config.put("StrictHostKeyChecking", "no");
             session.setConfig(config);
             session.connect();
-            System.out.println("Host connected.");
+            logger.debug("successfully connected to host " + hostname + "port: " + port + " user: " + username);
             channel = session.openChannel("sftp");
             channel.connect();
-            System.out.println("sftp channel opened and connected.");
+            logger.debug("sftp channel opened and connected.");
             channelSftp = (ChannelSftp) channel;
             return 0;
         }catch(Exception e){
-            Methods.printConditional("\nException in CustomSftpClient.connect: " + e.toString());
+            logger.error("Failed to connect host "+ hostname +"\n"+ e.toString());
+            return 1; //Exception
+        }
+    }
+
+    //Connect using Secure Shell using username password
+    public static int connect (String hostnameIn, int portIn, String usernameIn, String keyfilePath, String keyfilePass) {
+        try{
+            port=portIn;
+            hostname=hostnameIn;
+            username=usernameIn;
+            //Establish sftp Channel
+            jsch = new JSch();
+            session = jsch.getSession(username, hostname, port);
+            jsch.addIdentity(keyfilePath);
+            java.util.Properties config = new java.util.Properties();
+            config.put("StrictHostKeyChecking", "no");
+            session.setConfig(config);
+            session.connect();
+            channel = session.openChannel("sftp");
+            channel.connect();
+            logger.debug("sftp channel opened and connected.");
+            channelSftp = (ChannelSftp) channel;
+            logger.info("sftp successfully connected to host: " + hostname + " port: " + port + " user: " + username);
+            return 0;
+        }catch(Exception e){
+            logger.error("Failed to connect host: "+ hostname +"\n"+ e.toString());
             return 1; //Exception
         }
     }
@@ -76,14 +103,14 @@ public class CustomSftpClient {
     public static int close() {
         try{
             channelSftp.exit();
-            System.out.println("sftp Channel exited.");
+            logger.debug("sftp Channel exited.");
             channel.disconnect();
-            System.out.println("Channel disconnected.");
+            logger.debug("Channel disconnected.");
             session.disconnect();
-            System.out.println("Host Session disconnected.");
+            logger.debug("Host Session disconnected.");
             return 0;
         }catch(Exception  e){
-            Methods.printConditional("Exception in CustomSftpClient.close: " + e.toString());
+            logger.error("Exception in CustomSftpClient.close: " + e.toString());
             return 1;
         }
     }

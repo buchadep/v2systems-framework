@@ -97,8 +97,9 @@ public class CustomSqlClient {
                resultSet=statement.executeQuery(queryString);
                resultSetMetadata=resultSet.getMetaData();
             }
+            logger.debug("Executing SQL: " + queryString);
         }catch(SQLException e){
-            logger.error(e.toString());
+            logger.error(e.toString() + "SQL: "+queryString);
         }
     }
 //Print as well as return SQL query result
@@ -108,22 +109,25 @@ public class CustomSqlClient {
 //getResultSet can be controlled as verbose or non verbose also used by getRowCount
     public ResultSet getResultSet(boolean verbose){
         try{
-            logger.info("\nSQL: " + this.queryString);
-            String resultRow="";
+
+            String strResultRow="";
             int numberOfRows = 0;
             rowCount=0;
             //printing column Headers
             for(int i=0; i< resultSetMetadata.getColumnCount();i++) {
-                logger.debug(resultSetMetadata.getColumnLabel(i + 1) + "\t", verbose);
+                strResultRow=strResultRow+resultSetMetadata.getColumnLabel(i + 1) + "\t";
             }
-            System.out.print("\n");
+            logger.debug("\nSQL: " + this.queryString + "; Number of rows returned: "+ numberOfRows);
+            logger.debug(strResultRow);
+            strResultRow="";
             //printing Result set rows
             while(resultSet.next()) {
                 if(resultSet.toString()!=null) {
                     for (int i = 0; i < resultSetMetadata.getColumnCount(); i++) {
-                        resultRow=resultRow+resultSet.getString(resultSetMetadata.getColumnLabel(i + 1)) + "\t";
+                        strResultRow=strResultRow+resultSet.getString(resultSetMetadata.getColumnLabel(i + 1)) + "\t";
                     }
-                    logger.debug(resultRow);
+                    logger.debug(strResultRow);
+                    strResultRow="";
                     numberOfRows++;
                 }
             }
