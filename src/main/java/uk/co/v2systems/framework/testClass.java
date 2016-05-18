@@ -1,20 +1,7 @@
 package uk.co.v2systems.framework;
 
-import uk.co.v2systems.framework.database.CustomSqlClient;
-import uk.co.v2systems.framework.files.CustomFile;
 import uk.co.v2systems.framework.files.CustomXml;
-import uk.co.v2systems.framework.http.CustomHttpClient;
-import uk.co.v2systems.framework.server.CustomFtpServer;
-import uk.co.v2systems.framework.shell.CustomSshClient;
-import uk.co.v2systems.framework.shell.CustomTelnetClient;
 import uk.co.v2systems.framework.utils.*;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.Key;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by I&T Lab User on 22/06/2015.
@@ -29,7 +16,7 @@ public class testClass {
                 //CustomSshClient.executeCommand("ls -ltr /apps ",true);
 
 
-                ResizeImage.resizeImage( "C:\\Temp\\Spectre.JPG", 182, 243, "png","testResizeImage","C:\\Temp\\");
+                ResizeImage.resizeImage( "C:\\Temp\\Spectre.JPG", 182, 243, "png","testResizeImage","C:\\Temp\\", false);
 
                 /*
                 CustomFtpServer ftpServer = new CustomFtpServer();
